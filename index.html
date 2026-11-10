@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111318">
+<title>A Letter</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #111318;
+    --surface: #191c23;
+    --surface-2: #20242d;
+    --text: #e9e7e3;
+    --muted: #a6a7ad;
+    --accent: #d8b8a9;
+    --line: rgba(255,255,255,.09);
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+    background:
+      radial-gradient(ellipse at 50% -15%, rgba(190,145,126,.13), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: Georgia, "Noto Serif", "Noto Serif Devanagari", serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { width: 100%; max-width: 720px; margin: 0 auto; }
+  .gate {
+    min-height: calc(100svh - 60px);
+    display: grid;
+    place-items: center;
+  }
+  .gate-card {
+    width: 100%;
+    max-width: 390px;
+    padding: 30px 24px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: rgba(25,28,35,.92);
+    box-shadow: 0 18px 60px rgba(0,0,0,.28);
+    text-align: center;
+  }
+  .mark {
+    width: 46px; height: 46px; margin: 0 auto 20px;
+    display: grid; place-items: center;
+    border: 1px solid rgba(216,184,169,.35);
+    border-radius: 50%; color: var(--accent); font-size: 20px;
+  }
+  h1 {
+    margin: 0 0 9px; font-size: 25px; font-weight: 400;
+    letter-spacing: .02em;
+  }
+  .hint { margin: 0 0 24px; color: var(--muted); font: 14px/1.6 system-ui, sans-serif; }
+  .code {
+    width: 100%; height: 54px; padding: 0 16px;
+    border: 1px solid var(--line); border-radius: 13px;
+    background: var(--surface-2); color: var(--text);
+    text-align: center; letter-spacing: .45em; font: 20px system-ui, sans-serif;
+    outline: none;
+  }
+  .code:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(216,184,169,.12); }
+  .unlock {
+    width: 100%; min-height: 50px; margin-top: 12px;
+    border: 0; border-radius: 13px; background: var(--accent);
+    color: #211b19; font: 600 15px system-ui, sans-serif;
+    cursor: pointer;
+  }
+  .error { min-height: 22px; margin: 12px 0 0; color: #e5a39d; font: 13px system-ui, sans-serif; }
+  .letter { display: none; }
+  .letter-header { padding: 30px 4px 24px; border-bottom: 1px solid var(--line); margin-bottom: 26px; }
+  .eyebrow {
+    color: var(--accent); text-transform: uppercase; letter-spacing: .19em;
+    font: 11px system-ui, sans-serif;
+  }
+  .letter-header h1 { margin-top: 12px; font-size: clamp(29px, 7vw, 39px); }
+  .letter-header p { margin: 8px 0 0; color: var(--muted); font: 13px/1.6 system-ui, sans-serif; }
+  .letter-body {
+    padding: 0 3px;
+    font-size: clamp(17px, 4.4vw, 19px);
+    line-height: 1.88;
+    letter-spacing: .005em;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    word-break: normal;
+  }
+  .letter-body p { margin: 0 0 0.75em; }
+  .endnote {
+    margin: 34px 0 10px; padding-top: 18px; border-top: 1px solid var(--line);
+    color: var(--muted); text-align: center; font: 12px/1.6 system-ui, sans-serif;
+  }
+  .topbar { display:flex; justify-content:flex-end; margin: 4px 0 12px; }
+  .lock {
+    border: 1px solid var(--line); background: transparent; color: var(--muted);
+    border-radius: 999px; padding: 8px 12px; font: 12px system-ui, sans-serif;
+  }
+  @media (min-width: 600px) {
+    body { padding-top: 42px; }
+    .letter-header { padding-top: 40px; }
+    .letter-body { padding: 0 14px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .letter { animation: appear .45s ease both; }
+    @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="gate" id="gate" aria-label="Password access">
+    <div class="gate-card">
+      <div class="mark" aria-hidden="true">✦</div>
+      <h1>A personal letter</h1>
+      <p class="hint">Enter the access code to read.</p>
+      <form id="unlockForm">
+        <input class="code" id="passcode" type="password" inputmode="numeric"
+          autocomplete="off" maxlength="4" pattern="[0-9]{4}" placeholder="••••"
+          aria-label="Four digit access code" required>
+        <button class="unlock" type="submit">Unlock letter</button>
+      </form>
+      <p class="error" id="error" role="alert" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <article class="letter" id="letter">
+    <div class="topbar"><button class="lock" id="lockButton" type="button">Lock letter</button></div>
+    <header class="letter-header">
+      <div class="eyebrow">A personal letter</div>
+      <h1>For you</h1>
+      <p>Read slowly. There is no rush.</p>
+    </header>
+    <div class="letter-body" id="letterText">
+<p>Hey, i know I said a lot previously, and I'm feeling bad for that recently, i know it can't reverse the damage, but i still wanted to share something from today</p>
+
+<p>actually mujhe neend nhi aarhi thi, toh mai purani chat padne lgg gya apni, pta nhi kyun?, bss mann kiya toh pichle 1:30 ghnte se padte padte july august tkk pahunch gya, or maine saari chats ko tumhare POV se pda, or mujhe realise hone lga like ~ pehle sbb shi chl rha thaa, mai abb bhut jyada anxious hogya hu, don't know why, but shyd mai situation ke anusaar adapt nhi krr paya, mai 3 mahine pehle wali personality, thoughts ke anusaar hi chl rha abhi bhi, Orr inn sbb mai tumse bhi whi expect krne lga, unknowingly force bhi krne lga, afsos maine yeh msgs pehle kyun nhi pde, I know pehle mai utna anxious, forceful feel nhi hota thaa, but abb...</p>
+
+<p>really sorry yrr 🥺, dumb hu thoda late hi realise hota hai, tune bhut saha hai, koi nhi sehta, you are really great, awesome, what is the word, ahhh, I can't define it as of now, but this is one among the reason, i respect you for that 🫡, you are crazy, love you man. Kaash mai wapas time mai piche jaa pata, toh mai sirf 3 din nhi, 3 mahine piche jata,</p>
+
+<p>Meko pta hai, maine harr barr isi karan teko bhut hurt Kiya hai, yrr mtlb I never want to, I never intended but why the hell I end up here, it became a thing of always, I end up ruining the matter, wth i try my best to keep up, but always end up in a place where I hurt people, I stuck at one place, I'm not built for long term, I'm not worthy of anything, for me it's now becoming exhausting, i personally think, you should have blocked me a lot ago, yeah do it now, it's right time to take an exit, please, if you'll stay, i fear I might, ruin everything even for you again, and i even have reason for you to be angry on me, in previous 2 to 3 days, I was not okay, i didn't told you, I wrote it, but didn't told you, i broke my promise, so please be angry and go , block me, I deserve it, I'm not a good person.</p>
+
+<p>You also do not deserve to be hurt again and again, and I'll not be able to forget myself for that if I'll find myself hurting you. And this time I know you told me, I'm not a problem, still I'm saying that I hurt you, coz i seen myself hurting you, and i think a sorry is not enough now, Sins needs to be punished. And thanks as well ❤️‍🩹, I'm realising my truth coz of you, yeah truth got weird face, but truth still a truth,</p>
+
+<p>Also I'm not writing this message to change your decision or anything, I'm sharing with you, kyunki Mai iss cheez ke liye vachanbaddh hu, maine tumse kha thaa, nhi chupaunga kbhi kuchh, or mere liye yeh baat ki mai apna vachan nibhaunga sbse upr aati hai, Nidhi se bhi upr, mere liye mera vachan hi sbb kuchh hai, uske alawa tum or baaki cheezon tum se bhi kaafi baad mein aati hai, Mai yeh sbb kehke kuchh haseel nhi Krna chahta, sivaay ek cheez ke, ki mai glti se bhi tumhe hurt naa krr sku, so, Please would you block me</p>
+
+<p>Also you blocking me does not mean, I'm closing the gates, mine are open always, and welcoming as well, So Contact me everytime if you want a helping hand, Some Time (yes I mentioned time pichli ladai mai par wo meri glti thi, kyunki Mai time nikalna chahta hu hamesha, prr meri kismat hi esi hai ki mere hisse sirf ladai likhi hai), or ask for anything, I'll be more happier than you could imagine to be able to help with whatever you ask for,</p>
+
+<p>And one more thing, Maybe I might not be to contact after it untill you do, so remember, hmm, i tried writing a small poem i think,</p>
+
+<p>You are Softer than petal of Flowers,<br>
+Precious than Kohinoor and,<br>
+Stronger than Titanium,<br>
+Lovely than smell of a fresh rose,<br>
+Kind than Calmness of Water, Beautiful with Every beam of light striking your face and hair,<br>
+and by far your Smile is far more pleasent than most beautiful sky I'd ever seen and you as whole - Indescribable through the words available in human dictionary,<br>
+Or mine as of now 🙂</p>
+
+<p>See you next time you wanna talk about anything or want get something done, Take care Always 💕</p>
+
+<p>Hamesha time se khana khaa lena, So bhi Jana, Scooty tez nhi chalana, kisi ki buri baaton prr dhyan naa dena, kisi ke liye kbhi tarasna nhi, isme tera loss bilkul nhi, Kbhi rona nhi, or jbb jbb zindagi mushkil lgne lge bss yaad rkhna mai jyada dur nhi, Yeh mere wada rha mere darwaje hamesha khule hi milenge or lautna chahe toh bhi kbhi khaali nhi lotegi, Haan manta hu, Emotionally thoda kachha hu, thoda late samajh aata hai, but wada tbb tkk rhega jbb tkk mai rhungaa, agr mai wada pura nhi krr paya toh mai bhi nhi rhungaa,</p>
+
+<p>Kaafi lmba hogya already, baatein toh kbhi khtm nhi hogi, Isliye mai bhi iss letter ko yahan end krta hu, Kuchh bhul naa jana, Or hamesha apna khyal rkhna, Orr jbb naa rkh ske toh mujhe btana,</p>
+    </div>
+    <div class="endnote">End of letter</div>
+  </article>
+</main>
+<script>
+  const ACCESS_CODE = "1509";
+  const form = document.getElementById("unlockForm");
+  const input = document.getElementById("passcode");
+  const error = document.getElementById("error");
+  const gate = document.getElementById("gate");
+  const letter = document.getElementById("letter");
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (input.value === ACCESS_CODE) {
+      gate.style.display = "none";
+      letter.style.display = "block";
+      error.textContent = "";
+      window.scrollTo(0, 0);
+    } else {
+      error.textContent = "That code doesn't match. Please try again.";
+      input.value = "";
+      input.focus();
+    }
+  });
+
+  document.getElementById("lockButton").addEventListener("click", () => {
+    letter.style.display = "none";
+    gate.style.display = "grid";
+    input.value = "";
+    window.scrollTo(0, 0);
+    input.focus();
+  });
+</script>
+</body>
+</html>
